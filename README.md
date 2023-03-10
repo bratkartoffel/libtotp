@@ -1,7 +1,7 @@
 # TOTP code (RFC 6238) verification for java
 
 [![Java CI](https://github.com/bratkartoffel/libtotp-java/actions/workflows/build.yaml/badge.svg)](https://github.com/bratkartoffel/libtotp-java/actions/workflows/build.yaml)
-[![codecov](https://codecov.io/gh/bratkartoffel/libtotp-java/branch/master/graph/badge.svg?token=QgUmkgHSMd)](https://codecov.io/gh/bratkartoffel/libtotp-java)
+[![codecov](https://codecov.io/gh/bratkartoffel/libtotp-java/branch/develop/graph/badge.svg?token=QgUmkgHSMd)](https://codecov.io/gh/bratkartoffel/libtotp-java)
 [![License](http://img.shields.io/:license-mit-blue.svg?style=flat)](http://doge.mit-license.org)
 [![Central Version](https://img.shields.io/maven-central/v/eu.fraho.libs/libtotp-java)](https://mvnrepository.com/artifact/eu.fraho.libs/libtotp-java)
 
