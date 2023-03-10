@@ -1,9 +1,9 @@
 # TOTP code (RFC 6238) verification for java
 
-[![Java CI](https://github.com/bratkartoffel/libtotp-java/actions/workflows/build.yaml/badge.svg)](https://github.com/bratkartoffel/libtotp-java/actions/workflows/build.yaml)
-[![codecov](https://codecov.io/gh/bratkartoffel/libtotp-java/branch/develop/graph/badge.svg?token=QgUmkgHSMd)](https://codecov.io/gh/bratkartoffel/libtotp-java)
+[![Java CI](https://github.com/bratkartoffel/libtotp/actions/workflows/build.yaml/badge.svg)](https://github.com/bratkartoffel/libtotp/actions/workflows/build.yaml)
+[![codecov](https://codecov.io/gh/bratkartoffel/libtotp/branch/develop/graph/badge.svg?token=QgUmkgHSMd)](https://codecov.io/gh/bratkartoffel/libtotp)
 [![License](http://img.shields.io/:license-mit-blue.svg?style=flat)](http://doge.mit-license.org)
-[![Central Version](https://img.shields.io/maven-central/v/eu.fraho.libs/libtotp-java)](https://mvnrepository.com/artifact/eu.fraho.libs/libtotp-java)
+[![Central Version](https://img.shields.io/maven-central/v/eu.fraho.libs/libtotp)](https://mvnrepository.com/artifact/eu.fraho.libs/libtotp)
 
 Providing a simple way to integrate [RFC 6238](https://www.rfc-editor.org/rfc/rfc6238) conforming TOTP codes in your
 application.
@@ -17,7 +17,7 @@ This library was designed to be easy to use, lean (no external dependencies), se
 <dependencies>
     <dependency>
         <groupId>eu.fraho.libs</groupId>
-        <artifactId>libtotp-java</artifactId>
+        <artifactId>libtotp</artifactId>
         <version>1.0.0</version>
     </dependency>
 </dependencies>
