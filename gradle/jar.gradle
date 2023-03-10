@@ -1,0 +1,21 @@
+jar {
+    manifest {
+        attributes(
+                'Implementation-Title': rootProject.name,
+                'Implementation-Version': project.version,
+                'Build-Jdk': "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
+                'Compatibility': project.sourceCompatibility,
+                'Built-By': System.getProperty('user.name')
+        )
+    }
+    from('.') {
+        into 'META-INF/'
+        include 'LICENCE.md'
+        rename { 'LICENCE' }
+    }
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
