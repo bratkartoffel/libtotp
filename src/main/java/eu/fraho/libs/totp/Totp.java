@@ -144,9 +144,9 @@ public class Totp {
         byte[] hash = mac.doFinal(counter);
         int offset = hash[hash.length - 1] & 0x0f;
         return ((hash[offset] & 0x7f) << 24
-                | (hash[offset + 1] & 0xff) << 16
-                | (hash[offset + 2] & 0xff) << 8
-                | (hash[offset + 3] & 0xff)) % tokenMask;
+            | (hash[offset + 1] & 0xff) << 16
+            | (hash[offset + 2] & 0xff) << 8
+            | (hash[offset + 3] & 0xff)) % tokenMask;
     }
 
     @Contract(pure = true, value = "_ -> new")
