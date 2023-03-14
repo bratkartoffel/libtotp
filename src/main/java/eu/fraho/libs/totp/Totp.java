@@ -18,12 +18,17 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class Totp {
     private final Random random;
     @Getter
     private final TotpSettings settings;
+
+    public Totp() {
+        this(TotpSettings.DEFAULT);
+    }
 
     public Totp(@NotNull TotpSettings settings) {
         this(settings, new SecureRandom());
@@ -34,20 +39,34 @@ public class Totp {
         this.random = random;
     }
 
+    /**
+     * Verify the given code using a secret and the current time.
+     *
+     * @param secret shared secret
+     * @param code   the code to verify
+     * @return <code>true</code> if the code is valid according to the configured settings, <code>false</code> otherwise
+     */
     @Contract(pure = true)
     public boolean verifyCode(byte @NotNull [] secret, int code) {
         return verifyCode(secret, code, getTimeIndex());
     }
 
+
+    /**
+     * Verify the given code using a secret and a custom counter.
+     *
+     * @param secret  shared secret
+     * @param code    the code to verify
+     * @param counter custom counter
+     * @return <code>true</code> if the code is valid according to the configured settings, <code>false</code> otherwise
+     */
     @Contract(pure = true)
     public boolean verifyCode(byte @NotNull [] secret, int code, long counter) {
         int tokenMask = getTokenMod();
         SecretKeySpec key = new SecretKeySpec(secret, "RAW");
         try {
-            Mac mac = Mac.getInstance(settings.getHmac());
-            mac.init(key);
+            Mac mac = getMac(key);
             ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
-
             for (int i = -settings.getVariance(); i <= settings.getVariance(); i++) {
                 buffer.putLong(0, counter + i);
                 byte[] timeBytes = buffer.array();
@@ -64,11 +83,50 @@ public class Totp {
         return false;
     }
 
+    /**
+     * Generate a new shared secret
+     *
+     * @return shared secret
+     */
     @Contract(pure = true, value = "-> new")
     public byte @NotNull [] generateSecret() {
         byte[] secret = new byte[settings.getSecretLength()];
         random.nextBytes(secret);
         return secret;
+    }
+
+    /**
+     * Generate and return the currently valid code for the given secret.
+     *
+     * @param secret shared secret
+     * @return current code
+     * @throws IllegalArgumentException if the given secret is invalid
+     */
+    @Contract(pure = true)
+    public int getCode(byte @NotNull [] secret) throws IllegalArgumentException {
+        return getCode(secret, getTimeIndex());
+    }
+
+    /**
+     * Generate and return the currently valid code for the given secret.
+     *
+     * @param secret  shared secret
+     * @param counter custom counter
+     * @return current code
+     * @throws IllegalArgumentException if the given secret is invalid
+     */
+    @Contract(pure = true)
+    public int getCode(byte @NotNull [] secret, long counter) throws IllegalArgumentException {
+        int tokenMask = getTokenMod();
+        SecretKeySpec key = new SecretKeySpec(secret, "RAW");
+        try {
+            Mac mac = getMac(key);
+            ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+            buffer.putLong(0, counter);
+            return createCode(mac, buffer.array(), tokenMask);
+        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     @Contract(pure = true)
@@ -78,7 +136,7 @@ public class Totp {
 
     @Contract(pure = true)
     private long getTimeIndex() {
-        return System.currentTimeMillis() / 1000 / 30;
+        return TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()) / 30;
     }
 
     @Contract(pure = true)
@@ -89,5 +147,12 @@ public class Totp {
                 | (hash[offset + 1] & 0xff) << 16
                 | (hash[offset + 2] & 0xff) << 8
                 | (hash[offset + 3] & 0xff)) % tokenMask;
+    }
+
+    @Contract(pure = true, value = "_ -> new")
+    private @NotNull Mac getMac(@NotNull SecretKeySpec key) throws NoSuchAlgorithmException, InvalidKeyException {
+        Mac mac = Mac.getInstance(settings.getHmac());
+        mac.init(key);
+        return mac;
     }
 }

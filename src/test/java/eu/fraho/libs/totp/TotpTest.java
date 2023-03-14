@@ -105,4 +105,22 @@ public class TotpTest {
         Totp testee = new Totp(TotpSettings.builder().secretLength(length).build());
         Assertions.assertEquals(length, testee.generateSecret().length);
     }
+
+    @ParameterizedTest
+    @CsvSource({
+            "0,      755224",
+            "123,     33991",
+            "999,    106154",
+            "472833, 437675",
+    })
+    void testGetCode(long counter, int code) {
+        Totp testee = new Totp();
+        Assertions.assertEquals(code, testee.getCode(secret1, counter));
+    }
+
+    @Test
+    void testGetCodeVerifyCode() {
+        Totp testee = new Totp(TotpSettings.builder().variance(1).build());
+        Assertions.assertTrue(testee.verifyCode(secret1, testee.getCode(secret1)));
+    }
 }

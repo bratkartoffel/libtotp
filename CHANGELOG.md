@@ -2,7 +2,9 @@
 
 ### [unreleased]
 
-* no changes yet
+* add Totp.getCode() to retrieve current code for a shared secret
+* add default constructor for Totp class
+* add javadoc documentation
 
 ### [v1.0.0] (2023-03-10)
 
