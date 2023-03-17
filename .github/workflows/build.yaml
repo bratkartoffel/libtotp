@@ -23,6 +23,7 @@ jobs:
             github.com:443
             objects.githubusercontent.com:443
             plugins.gradle.org:443
+            plugins-artifacts.gradle.org:443
             services.gradle.org:443
             uploader.codecov.io:443
       - uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f # v3.4.0
