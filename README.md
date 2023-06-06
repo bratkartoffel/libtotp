@@ -17,7 +17,7 @@ This library was designed to be easy to use, lean (no external dependencies), se
 <dependency>
     <groupId>eu.fraho.libs</groupId>
     <artifactId>libtotp</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
