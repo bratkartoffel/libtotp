@@ -10,6 +10,5 @@
 
 * initial release
 
-[unreleased]: https://github.com/bratkartoffel/libtotp-java/tree/develop
-
+[unreleased]: https://github.com/bratkartoffel/libtotp-java/compare/v1.0.0...develop
 [v1.0.0]: https://github.com/bratkartoffel/libtotp-java/tree/v1.0.0
