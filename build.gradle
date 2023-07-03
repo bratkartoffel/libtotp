@@ -1,7 +1,7 @@
 plugins {
     id 'java-library'
     id 'me.champeau.jmh' version '0.7.1'
-    id 'io.freefair.lombok' version '8.0.1'
+    id 'io.freefair.lombok' version '8.1.0'
 }
 
 group 'eu.fraho.libs'
