@@ -41,7 +41,7 @@ jobs:
           distribution: 'adopt'
           java-version: '8'
           cache: 'gradle'
-      - uses: gradle/actions/wrapper-validation@94baf225fe0a508e581a564467443d0e2379123b # v4
+      - uses: gradle/actions/wrapper-validation@06832c7b30a0129d7fb559bcc6e43d26f6374244 # v4
       - run: ./gradlew --no-daemon check jacocoTestReport
       - uses: codecov/codecov-action@0565863a31f2c772f9f0395002a31e3f06189574 # v5.4.0
         with:
