@@ -43,7 +43,7 @@ jobs:
           cache: 'gradle'
       - uses: gradle/actions/wrapper-validation@06832c7b30a0129d7fb559bcc6e43d26f6374244 # v4
       - run: ./gradlew --no-daemon check jacocoTestReport
-      - uses: codecov/codecov-action@0565863a31f2c772f9f0395002a31e3f06189574 # v5.4.0
+      - uses: codecov/codecov-action@ad3126e916f78f00edff4ed0317cf185271ccc2d # v5.4.2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
       - uses: mikepenz/action-junit-report@cf701569b05ccdd861a76b8607a66d76f6fd4857 # v5
