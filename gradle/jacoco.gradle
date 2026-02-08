@@ -1,8 +1,8 @@
 apply plugin: 'jacoco'
 
-jacocoTestReport {
-    reports {
-        html.required = true
-        xml.required = true
-    }
+jacoco.toolVersion = "0.8.14"
+jacocoTestReport.reports {
+    xml.required = true
+    html.required = true
 }
+check.dependsOn(jacocoTestReport)
