@@ -21,6 +21,7 @@ jobs:
           egress-policy: block
           allowed-endpoints: >
             api.adoptopenjdk.net:443
+            api.adoptium.net:443
             api.github.com:443
             codecov.io:443
             downloads.gradle-dn.com:443
