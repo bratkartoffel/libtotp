@@ -26,7 +26,6 @@ public class TotpSettings {
     int secretLength = 20;
 
     @Builder.Default
-    @NotNull
     @MagicConstant(stringValues = {"HmacSHA1", "HmacSHA256", "HmacSHA2512"})
     String hmac = "HmacSHA1";
 

@@ -15,67 +15,67 @@ public class TotpTest {
     private static final byte[] secret512 = "1234567890123456789012345678901234567890123456789012345678901234".getBytes(StandardCharsets.US_ASCII);
 
     @Test
-    void testVerifyCode() {
+    void testVerifyCode() throws InvalidCodeException {
         Totp testee = new Totp(TotpSettings.DEFAULT);
-        Assertions.assertFalse(testee.verifyCode(secret1, 287922, 10)); // -4
-        Assertions.assertTrue(testee.verifyCode(secret1, 162583, 10)); // -3
-        Assertions.assertTrue(testee.verifyCode(secret1, 399871, 10)); // -2
-        Assertions.assertTrue(testee.verifyCode(secret1, 520489, 10)); // -1
-        Assertions.assertTrue(testee.verifyCode(secret1, 403154, 10)); // 0
-        Assertions.assertTrue(testee.verifyCode(secret1, 481090, 10)); // 1
-        Assertions.assertTrue(testee.verifyCode(secret1, 868912, 10)); // 2
-        Assertions.assertTrue(testee.verifyCode(secret1, 736127, 10)); // 3
-        Assertions.assertFalse(testee.verifyCode(secret1, 229903, 10)); // 4
+        Assertions.assertThrows(InvalidCodeException.class, () -> testee.verifiedCounter(secret1, 287922, 10)); // -4
+        Assertions.assertEquals(7, testee.verifiedCounter(secret1, 162583, 10)); // -3
+        Assertions.assertEquals(8, testee.verifiedCounter(secret1, 399871, 10)); // -2
+        Assertions.assertEquals(9, testee.verifiedCounter(secret1, 520489, 10)); // -1
+        Assertions.assertEquals(10, testee.verifiedCounter(secret1, 403154, 10)); // 0
+        Assertions.assertEquals(11, testee.verifiedCounter(secret1, 481090, 10)); // 1
+        Assertions.assertEquals(12, testee.verifiedCounter(secret1, 868912, 10)); // 2
+        Assertions.assertEquals(13, testee.verifiedCounter(secret1, 736127, 10)); // 3
+        Assertions.assertThrows(InvalidCodeException.class, () -> testee.verifiedCounter(secret1, 229903, 10)); // 4
     }
 
     @Test
-    void testVerifyCode2() {
+    void testVerifyCode2() throws InvalidCodeException {
         Totp testee = new Totp(TotpSettings.DEFAULT);
-        Assertions.assertFalse(testee.verifyCode(secret2, 475915, 10)); // -4
-        Assertions.assertTrue(testee.verifyCode(secret2, 808817, 10)); // -3
-        Assertions.assertTrue(testee.verifyCode(secret2, 397776, 10)); // -2
-        Assertions.assertTrue(testee.verifyCode(secret2, 989534, 10)); // -1
-        Assertions.assertTrue(testee.verifyCode(secret2, 234408, 10)); // 0
-        Assertions.assertTrue(testee.verifyCode(secret2, 334030, 10)); // 1
-        Assertions.assertTrue(testee.verifyCode(secret2, 664443, 10)); // 2
-        Assertions.assertTrue(testee.verifyCode(secret2, 606751, 10)); // 3
-        Assertions.assertFalse(testee.verifyCode(secret2, 593219, 10)); // 4
+        Assertions.assertThrows(InvalidCodeException.class, () -> testee.verifiedCounter(secret2, 475915, 10)); // -4
+        Assertions.assertEquals(7, testee.verifiedCounter(secret2, 808817, 10)); // -3
+        Assertions.assertEquals(8, testee.verifiedCounter(secret2, 397776, 10)); // -2
+        Assertions.assertEquals(9, testee.verifiedCounter(secret2, 989534, 10)); // -1
+        Assertions.assertEquals(10, testee.verifiedCounter(secret2, 234408, 10)); // 0
+        Assertions.assertEquals(11, testee.verifiedCounter(secret2, 334030, 10)); // 1
+        Assertions.assertEquals(12, testee.verifiedCounter(secret2, 664443, 10)); // 2
+        Assertions.assertEquals(13, testee.verifiedCounter(secret2, 606751, 10)); // 3
+        Assertions.assertThrows(InvalidCodeException.class, () -> testee.verifiedCounter(secret2, 593219, 10)); // 4
     }
 
     @Test
-    void testVerifyCodeVariance2() {
+    void testVerifyCodeVariance2() throws InvalidCodeException {
         Totp testee = new Totp(TotpSettings.builder().variance(2).build());
-        Assertions.assertFalse(testee.verifyCode(secret1, 162583, 10)); // -3
-        Assertions.assertTrue(testee.verifyCode(secret1, 399871, 10)); // -2
-        Assertions.assertTrue(testee.verifyCode(secret1, 520489, 10)); // -1
-        Assertions.assertTrue(testee.verifyCode(secret1, 403154, 10)); // 0
-        Assertions.assertTrue(testee.verifyCode(secret1, 481090, 10)); // 1
-        Assertions.assertTrue(testee.verifyCode(secret1, 868912, 10)); // 2
-        Assertions.assertFalse(testee.verifyCode(secret1, 736127, 10)); // 3
+        Assertions.assertThrows(InvalidCodeException.class, () -> testee.verifiedCounter(secret1, 162583, 10)); // -3
+        Assertions.assertEquals(8, testee.verifiedCounter(secret1, 399871, 10)); // -2
+        Assertions.assertEquals(9, testee.verifiedCounter(secret1, 520489, 10)); // -1
+        Assertions.assertEquals(10, testee.verifiedCounter(secret1, 403154, 10)); // 0
+        Assertions.assertEquals(11, testee.verifiedCounter(secret1, 481090, 10)); // 1
+        Assertions.assertEquals(12, testee.verifiedCounter(secret1, 868912, 10)); // 2
+        Assertions.assertThrows(InvalidCodeException.class, () -> testee.verifiedCounter(secret1, 736127, 10)); // 3
     }
 
     @Test
-    void testVerifyCodeLength8() {
+    void testVerifyCodeLength8() throws InvalidCodeException {
         Totp testee = new Totp(TotpSettings.builder().tokenLength(8).build());
-        Assertions.assertTrue(testee.verifyCode(secret1, 82162583, 10)); // -3
-        Assertions.assertTrue(testee.verifyCode(secret1, 73399871, 10)); // -2
-        Assertions.assertTrue(testee.verifyCode(secret1, 45520489, 10)); // -1
-        Assertions.assertTrue(testee.verifyCode(secret1, 72403154, 10)); // 0
-        Assertions.assertTrue(testee.verifyCode(secret1, 43481090, 10)); // 1
-        Assertions.assertTrue(testee.verifyCode(secret1, 47868912, 10)); // 2
-        Assertions.assertTrue(testee.verifyCode(secret1, 33736127, 10)); // 3
+        Assertions.assertEquals(7, testee.verifiedCounter(secret1, 82162583, 10)); // -3
+        Assertions.assertEquals(8, testee.verifiedCounter(secret1, 73399871, 10)); // -2
+        Assertions.assertEquals(9, testee.verifiedCounter(secret1, 45520489, 10)); // -1
+        Assertions.assertEquals(10, testee.verifiedCounter(secret1, 72403154, 10)); // 0
+        Assertions.assertEquals(11, testee.verifiedCounter(secret1, 43481090, 10)); // 1
+        Assertions.assertEquals(12, testee.verifiedCounter(secret1, 47868912, 10)); // 2
+        Assertions.assertEquals(13, testee.verifiedCounter(secret1, 33736127, 10)); // 3
     }
 
     @Test
-    void testVerifyCodeHmacSha256() {
+    void testVerifyCodeHmacSha256() throws InvalidCodeException {
         Totp testee = new Totp(TotpSettings.builder().hmac("HmacSHA256").build());
-        Assertions.assertTrue(testee.verifyCode(secret1, 579288, 10)); // -3
-        Assertions.assertTrue(testee.verifyCode(secret1, 895912, 10)); // -2
-        Assertions.assertTrue(testee.verifyCode(secret1, 184989, 10)); // -1
-        Assertions.assertTrue(testee.verifyCode(secret1, 586609, 10)); // 0
-        Assertions.assertTrue(testee.verifyCode(secret1, 771515, 10)); // 1
-        Assertions.assertTrue(testee.verifyCode(secret1, 360470, 10)); // 2
-        Assertions.assertTrue(testee.verifyCode(secret1, 916449, 10)); // 3
+        Assertions.assertEquals(7, testee.verifiedCounter(secret1, 579288, 10)); // -3
+        Assertions.assertEquals(8, testee.verifiedCounter(secret1, 895912, 10)); // -2
+        Assertions.assertEquals(9, testee.verifiedCounter(secret1, 184989, 10)); // -1
+        Assertions.assertEquals(10, testee.verifiedCounter(secret1, 586609, 10)); // 0
+        Assertions.assertEquals(11, testee.verifiedCounter(secret1, 771515, 10)); // 1
+        Assertions.assertEquals(12, testee.verifiedCounter(secret1, 360470, 10)); // 2
+        Assertions.assertEquals(13, testee.verifiedCounter(secret1, 916449, 10)); // 3
     }
 
     @ParameterizedTest
@@ -88,15 +88,15 @@ public class TotpTest {
         " 2000000000, 69279037, 90698825, 38618901",
         "20000000000, 65353130, 77737706, 47863826",
     })
-    void testRfc6238Vectors(long clock, int code1, int code256, int code512) {
+    void testRfc6238Vectors(long clock, int code1, int code256, int code512) throws InvalidCodeException {
         Totp testeeSha1 = new Totp(TotpSettings.builder().tokenLength(8).variance(0).hmac("HmacSHA1").build());
         Totp testeeSha256 = new Totp(TotpSettings.builder().tokenLength(8).variance(0).hmac("HmacSHA256").build());
         Totp testeeSha512 = new Totp(TotpSettings.builder().tokenLength(8).variance(0).hmac("HmacSHA512").build());
 
         long counter = clock / 30;
-        Assertions.assertTrue(testeeSha1.verifyCode(secret1, code1, counter), testeeSha1.getSettings().getHmac());
-        Assertions.assertTrue(testeeSha256.verifyCode(secret256, code256, counter), testeeSha256.getSettings().getHmac());
-        Assertions.assertTrue(testeeSha512.verifyCode(secret512, code512, counter), testeeSha512.getSettings().getHmac());
+        Assertions.assertEquals(counter, testeeSha1.verifiedCounter(secret1, code1, counter), testeeSha1.getSettings().getHmac());
+        Assertions.assertEquals(counter, testeeSha256.verifiedCounter(secret256, code256, counter), testeeSha256.getSettings().getHmac());
+        Assertions.assertEquals(counter, testeeSha512.verifiedCounter(secret512, code512, counter), testeeSha512.getSettings().getHmac());
     }
 
     @ParameterizedTest
@@ -119,8 +119,8 @@ public class TotpTest {
     }
 
     @Test
-    void testGetCodeVerifyCode() {
+    void testGetCodeVerifyCode() throws InvalidCodeException {
         Totp testee = new Totp(TotpSettings.builder().variance(1).build());
-        Assertions.assertTrue(testee.verifyCode(secret1, testee.getCode(secret1)));
+        Assertions.assertNotEquals(-1, testee.verifiedCounter(secret1, testee.getCode(secret1)));
     }
 }

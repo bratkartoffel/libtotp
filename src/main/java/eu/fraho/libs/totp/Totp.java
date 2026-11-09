@@ -9,7 +9,6 @@ package eu.fraho.libs.totp;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -30,11 +29,11 @@ public class Totp {
         this(TotpSettings.DEFAULT);
     }
 
-    public Totp(@NotNull TotpSettings settings) {
+    public Totp(TotpSettings settings) {
         this(settings, new SecureRandom());
     }
 
-    public Totp(@NotNull TotpSettings settings, @NotNull Random random) {
+    public Totp(TotpSettings settings, Random random) {
         this.settings = settings;
         this.random = random;
     }
@@ -45,12 +44,16 @@ public class Totp {
      * @param secret shared secret
      * @param code   the code to verify
      * @return <code>true</code> if the code is valid according to the configured settings, <code>false</code> otherwise
+     * @deprecated Use {@link #verifiedCounter(byte[], int)} instead
      */
-    @Contract(pure = true)
-    public boolean verifyCode(byte @NotNull [] secret, int code) {
-        return verifyCode(secret, code, getTimeIndex());
+    @Deprecated
+    public boolean verifyCode(byte[] secret, int code) {
+        try {
+            return verifiedCounter(secret, code) > -1;
+        } catch (InvalidCodeException e) {
+            return false;
+        }
     }
-
 
     /**
      * Verify the given code using a secret and a custom counter.
@@ -59,10 +62,44 @@ public class Totp {
      * @param code    the code to verify
      * @param counter custom counter
      * @return <code>true</code> if the code is valid according to the configured settings, <code>false</code> otherwise
+     * @deprecated Use {@link #verifiedCounter(byte[], int, long)} instead
      */
     @Contract(pure = true)
-    public boolean verifyCode(byte @NotNull [] secret, int code, long counter) {
+    @Deprecated
+    public boolean verifyCode(byte[] secret, int code, long counter) {
+        try {
+            return verifiedCounter(secret, code, counter) > -1;
+        } catch (InvalidCodeException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Verify the given code using a secret and the current time.<br>
+     * The result should be cached to prevent replay attacks. Only newer codes (larger counter) should be accepted.
+     *
+     * @param secret shared secret
+     * @param code   the code to verify
+     * @return the matched counter (30s window) when it matched
+     */
+    @Contract(pure = true)
+    public long verifiedCounter(byte[] secret, int code) throws InvalidCodeException {
+        return verifiedCounter(secret, code, getTimeIndex());
+    }
+
+    /**
+     * Verify the given code using a secret and a custom counter.<br>
+     * The result should be cached to prevent replay attacks. Only newer codes (larger counter) should be accepted.
+     *
+     * @param secret  shared secret
+     * @param code    the code to verify
+     * @param counter custom counter
+     * @return the matched counter (30s window) when it matched
+     */
+    @Contract(pure = true)
+    public long verifiedCounter(byte[] secret, int code, long counter) throws InvalidCodeException {
         int tokenMask = getTokenMod();
+        long result = -1;
         SecretKeySpec key = new SecretKeySpec(secret, "RAW");
         try {
             Mac mac = getMac(key);
@@ -73,14 +110,17 @@ public class Totp {
                 int calculated = createCode(mac, timeBytes, tokenMask);
                 log.trace("Verifying code offset={}, calculated={}, given={}", i, calculated, code);
                 if (calculated == code) {
-                    return true;
+                    result = counter + i;
                 }
             }
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
             log.error("Error checking totp pin", e);
         }
 
-        return false;
+        if (result == -1) {
+            throw new InvalidCodeException();
+        }
+        return result;
     }
 
     /**
@@ -89,7 +129,7 @@ public class Totp {
      * @return shared secret
      */
     @Contract(pure = true, value = "-> new")
-    public byte @NotNull [] generateSecret() {
+    public byte[] generateSecret() {
         byte[] secret = new byte[settings.getSecretLength()];
         random.nextBytes(secret);
         return secret;
@@ -103,7 +143,7 @@ public class Totp {
      * @throws IllegalArgumentException if the given secret is invalid
      */
     @Contract(pure = true)
-    public int getCode(byte @NotNull [] secret) throws IllegalArgumentException {
+    public int getCode(byte[] secret) throws IllegalArgumentException {
         return getCode(secret, getTimeIndex());
     }
 
@@ -116,7 +156,7 @@ public class Totp {
      * @throws IllegalArgumentException if the given secret is invalid
      */
     @Contract(pure = true)
-    public int getCode(byte @NotNull [] secret, long counter) throws IllegalArgumentException {
+    public int getCode(byte[] secret, long counter) throws IllegalArgumentException {
         int tokenMask = getTokenMod();
         SecretKeySpec key = new SecretKeySpec(secret, "RAW");
         try {
@@ -140,7 +180,7 @@ public class Totp {
     }
 
     @Contract(pure = true)
-    private int createCode(@NotNull Mac mac, byte @NotNull [] counter, int tokenMask) {
+    private int createCode(Mac mac, byte[] counter, int tokenMask) {
         byte[] hash = mac.doFinal(counter);
         int offset = hash[hash.length - 1] & 0x0f;
         return ((hash[offset] & 0x7f) << 24
@@ -150,7 +190,7 @@ public class Totp {
     }
 
     @Contract(pure = true, value = "_ -> new")
-    private @NotNull Mac getMac(@NotNull SecretKeySpec key) throws NoSuchAlgorithmException, InvalidKeyException {
+    private Mac getMac(SecretKeySpec key) throws NoSuchAlgorithmException, InvalidKeyException {
         Mac mac = Mac.getInstance(settings.getHmac());
         mac.init(key);
         return mac;
