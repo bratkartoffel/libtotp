@@ -1,6 +1,9 @@
 # Changelog
 
 ### [unreleased]
+* no changes yet
+
+### [v1.2.0] (2026-11-09)
 * enhance Totp to return the matched counter to prevent replay attacks
 * add JSpecify NullMarked annotations
 
@@ -13,6 +16,7 @@
 
 * initial release
 
-[unreleased]: https://github.com/bratkartoffel/libtotp-java/compare/v1.1.0...develop
+[unreleased]: https://github.com/bratkartoffel/security-jwt/compare/v1.2.0...develop
+[v1.2.0]: https://github.com/bratkartoffel/security-jwt/compare/v1.1.0...v1.2.0
 [v1.1.0]: https://github.com/bratkartoffel/libtotp-java/compare/v1.0.0...v1.1.0
 [v1.0.0]: https://github.com/bratkartoffel/libtotp-java/tree/v1.0.0
