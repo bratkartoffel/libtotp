@@ -27,33 +27,54 @@ This library was designed to be easy to use, lean (no external dependencies), se
 import eu.fraho.libs.totp.*;
 
 import java.nio.charset.StandardCharsets;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class Example {
-    public static void main(String[] args) {
-        // the code to verify
-        int code = Integer.parseInt(args[0]);
+    // default settings (sha1, 6 digits, allow clock screw of +- 90 seconds)
+    private final Totp totp = new Totp(TotpSettings.DEFAULT);
+    // map to cache the last used totp counters, prevent replay attacks
+    private final Map<Long, AtomicLong> lastTotpCounters = new HashMap<>();
 
-        // default settings (sha1, 6 digits, allow clock screw of +- 90 seconds)
-        Totp testee = new Totp(TotpSettings.DEFAULT);
+    public static void main(String[] args) {
+        Example testee = new Example();
+
+        // the code to verify
+        int code = Integer.parseInt(args.length > 0 ? args[0] : "520489");
 
         // get the shared secret key
-        byte[] secret = "sharedSecret".getBytes(StandardCharsets.UTF_8);
+        byte[] secret = "12345678901234567890".getBytes(StandardCharsets.UTF_8);
 
-        // do the verification using the current time
-        if (testee.verifyCode(secret, code)) {
-            System.out.println("Now: All ok!");
-        } else {
-            System.out.println("Now: Wrong code!");
-        }
+        // first try => should succeed
+        System.out.println("First: " + testee.doLogin(1, secret, code));
+        // replay attack if first succeeded
+        System.out.println("Second: " + testee.doLogin(1, secret, code));
+        // another user => should succeed again
+        System.out.println("First: " + testee.doLogin(2, secret, code));
+    }
 
-        // do the verification using a specific time
-        long timestamp = ZonedDateTime.of(2023, 3, 10, 8, 9, 10, 0, ZoneId.of("Europe/Berlin")).toEpochSecond();
-        if (testee.verifyCode(secret, code, timestamp / 30)) {
-            System.out.println("Custom time: All ok!");
-        } else {
-            System.out.println("Custom time: Wrong code!");
+    public boolean doLogin(long userId, byte[] secret, int code) {
+        try {
+            // use a fixed counter (time window) for this example to work
+            // omit the last parameter on production!
+            long counter = totp.verifiedCounter(secret, code, 10);
+            // code is valid, lets check for replay attack
+            AtomicLong lastUsedCounter = lastTotpCounters.computeIfAbsent(userId, k -> new AtomicLong());
+            // get the last successfully verified counter
+            long value = lastUsedCounter.get();
+            // the used code is later than the cached counter => update, all good
+            if(counter > value) {
+                // atomically update the counter, only return success if the value wasn't updated in the meantime
+                return lastUsedCounter.compareAndSet(value, counter);
+            }
+            // possible replay attack
+            System.out.println("Replay attack detected, denying access");
+            return false;
+        } catch (InvalidCodeException e) {
+            // code is invalid!
+            System.out.println("Invalid code given, denying access");
+            return false;
         }
     }
 }
