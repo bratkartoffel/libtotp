@@ -1,0 +1,55 @@
+#!/bin/bash
+set -e
+
+current_version=$(cat version.txt)
+release_version=${current_version/-SNAPSHOT/}
+previous_version=$(grep -Eo '^\[v[0-9.]+\]' CHANGELOG.md | tr -d '[]' | sort -V | tail -n1 | tr -d 'v')
+next_version="$(perl -pe 's/^((\d+\.)*)(\d+)(.*)$/$1.($3+1).$4/e' <<<"$release_version")-SNAPSHOT"
+
+# start release
+git flow release start "v$release_version"
+
+# set version number to release
+sed -i "s/$current_version/$release_version/" version.txt
+git add version.txt
+git commit -m "Version updated from $current_version to version $release_version"
+
+# update the changelog
+sed -i \
+  -e "/### \[unreleased/a * no changes yet\n\n### [v$release_version] ($(date +%Y-%m-%d))" \
+  -e "/^\[unreleased\]:/a [v$release_version]: https://github.com/bratkartoffel/security-jwt/compare/v${previous_version}...v${release_version}" \
+  -e "s|^\[unreleased\]:.\+develop$|[unreleased]: https://github.com/bratkartoffel/security-jwt/compare/v${release_version}...develop|" \
+  CHANGELOG.md
+
+# commit the changelog
+git add CHANGELOG.md
+git commit -m "Add release v$release_version to changelog"
+
+# update the READMEs
+find . -name README.md -exec sed -i "s@<version>${previous_version}</version>@<version>${release_version}</version>@" {} \;
+find . -name README.md -exec git add {} \;
+git commit -m "Update README with new release"
+
+# run the build and publish to central
+./gradlew clean publish
+
+# finish the release, merge the branches and create tag
+git flow release finish -m "Release v$release_version"
+
+# set version number to next snapshot
+sed -i "s/$release_version/$next_version/" version.txt
+git add version.txt
+git commit -m "Update version to next snapshot"
+
+# publish to central
+ossrhUsername="unset"
+ossrhPassword="unset"
+eval "$(grep -E ^ossrh ~/.gradle/gradle.properties)"
+if [[  "$ossrhUsername" != "unset" ]] && [[  "$ossrhPassword" != "unset" ]]; then
+  # try ipv6 first, then fallback to ipv4
+  curl --fail -6v -X POST -u "$ossrhUsername:$ossrhPassword" https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/eu.fraho ||
+    curl --fail -4v -X POST -u "$ossrhUsername:$ossrhPassword" https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/eu.fraho
+fi
+
+# push everything upstream
+git push --atomic origin -- develop master refs/tags/"v$release_version"
