@@ -1,23 +1,26 @@
 // release to central
 apply plugin: 'maven-publish'
-apply plugin: 'signing'
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
             groupId = project.group
-            artifactId = project.name
+            artifactId = "${rootProject.name}-${project.name}"
             version = project.version
             from components.java
 
+            suppressPomMetadataWarningsFor('testFixturesApiElements')
+            suppressPomMetadataWarningsFor('testFixturesRuntimeElements')
+
             pom {
-                name = project.name
+                name = "${rootProject.name}-${project.name}"
                 description = project.description
-                url = 'https://github.com/bratkartoffel/libtotp-java'
+                url = 'https://github.com/bratkartoffel/security-jwt'
 
                 scm {
-                    connection = 'scm:git:https://github.com/bratkartoffel/libtotp-java.git'
-                    developerConnection = 'scm:git:git@github.com:bratkartoffel/libtotp-java.git'
-                    url = 'https://github.com/bratkartoffel/libtotp-java.git'
+                    connection = 'scm:git:https://github.com/bratkartoffel/security-jwt.git'
+                    developerConnection = 'scm:git:git@github.com:bratkartoffel/security-jwt.git'
+                    url = 'https://github.com/bratkartoffel/security-jwt.git'
                 }
 
                 licenses {
@@ -41,10 +44,23 @@ publishing {
     repositories {
         maven {
             credentials {
-                username = project.hasProperty('ossrhUsername') ? project.property('ossrhUsername') : null
-                password = project.hasProperty('ossrhPassword') ? project.property('ossrhPassword') : null
+                username = project.findProperty('ossrhUsername')
+                password = project.findProperty('ossrhPassword')
             }
             url = 'https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/'
         }
     }
+}
+
+// Signature of artifacts
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+if (project.hasProperty('signing.gnupg.keyName')) {
+    signing {
+        useGpgCmd()
+        required = !rootProject.version.endsWith('-SNAPSHOT')
+        sign publishing.publications.mavenJava
+    }
+} else {
+    logger.info("Disable signing of artifacts as no key is configured")
 }

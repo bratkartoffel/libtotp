@@ -1,8 +1,8 @@
 # Changelog
 
 ### [unreleased]
-
-* no changes yet
+* enhance Totp to return the matched counter to prevent replay attacks
+* add JSpecify NullMarked annotations
 
 ### [v1.1.0] (2023-06-06)
 * add Totp.getCode() to retrieve current code for a shared secret

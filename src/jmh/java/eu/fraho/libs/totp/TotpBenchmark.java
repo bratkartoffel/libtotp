@@ -17,8 +17,8 @@ import java.nio.charset.StandardCharsets;
 @SuppressWarnings("unused")
 public class TotpBenchmark {
     @Benchmark
-    public void verifyCode(Blackhole blackhole, Context ctx) {
-        blackhole.consume(ctx.testee.verifyCode(ctx.secret, 123456));
+    public void verifyCode(Blackhole blackhole, Context ctx) throws InvalidCodeException {
+        blackhole.consume(ctx.testee.verifiedCounter(ctx.secret, 868912, 10));
     }
 
     @Benchmark
